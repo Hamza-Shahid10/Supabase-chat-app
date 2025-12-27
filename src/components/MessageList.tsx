@@ -12,7 +12,8 @@ export default function MessageList({ chatId }: { chatId: string }) {
         .select("*")
         .eq("chat_id", chatId)
         .order("created_at");
-
+      console.log(chatId)
+      console.log(data)
       setMessages(data || []);
     };
 

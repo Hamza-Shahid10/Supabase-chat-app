@@ -7,8 +7,9 @@ import { useAuth } from '@/hooks/UseAuth';
 
 export default function ChatLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
+  console.log(user , "user")
 
-  if (loading) return null; // wait until session is checked
+  if (loading) return null;
 
   return (
     <>

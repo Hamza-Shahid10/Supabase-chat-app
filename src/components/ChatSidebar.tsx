@@ -3,15 +3,15 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/config/supabase";
 import { startChat } from "@/hooks/Chats";
 import { useRouter } from "next/navigation";
+import UsersList from '@/components/UserLists';
 import Link from "next/link";
 
 
 interface ChatSidebarProps {
     user: {
-        email: string,
-        user_metadata: {
-            display_name: string
-        }
+        id: string,
+        avatar_url: string,
+        name: string
     }
 }
 
@@ -21,11 +21,7 @@ export default function ChatSidebar({ user }: ChatSidebarProps) {
 
     useEffect(() => {
         const fetchChats = async () => {
-            const { data } = await supabase
-                .from("chat_participants")
-                .select("chat_id")
-                .eq("user_id", (await supabase.auth.getUser()).data.user?.id);
-
+            const { data } = await supabase.from("chats").select("*")
             setChats(data || []);
         };
         fetchChats();
@@ -33,20 +29,15 @@ export default function ChatSidebar({ user }: ChatSidebarProps) {
 
     return (
         <div style={{ width: 250, padding: 20, borderRight: "1px solid #ccc" }}>
-            <h2>{user?.user_metadata?.display_name} Chats</h2>
+            <h2>{user?.name} Chats</h2>
             {chats && chats.map((c: any) => (
-                <div key={c.chat_id} style={{ marginTop: 10 }}>
-                    <Link href={`/chat/${c.chat_id}`}>Chat {c.chat_id.slice(0, 6)}</Link>
+                <div key={c.id} style={{ marginTop: 10 }}>
+                    <Link href={`/${c.id}`}>{c.chat_name}</Link>
                 </div>
             ))}
-            <button
-                onClick={async () => {
-                    const chatId = await startChat('OTHER_USER_ID_HERE');
-                    router.push(`/${chatId}`);
-                }}
-            >
-                Start Chat
-            </button>
+            
+            <br />
+            <UsersList />
         </div>
     );
 }

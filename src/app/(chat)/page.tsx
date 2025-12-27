@@ -10,24 +10,16 @@ export default function ChatHomePage() {
   useEffect(() => {
     let userId: string;
 
-    const loadChats = async () => {
+    const fetchUser = async () => {
       const user = await getUser();
       if (!user) {
         router.replace("/login");
         return;
       }
-
       userId = user.id;
-
-      const { data, error } = await supabase
-        .from("chat_participants")
-        .select("chat_id")
-        .eq("user_id", user.id);
-
-      if (!error) setChats(data || []);
     };
 
-    loadChats();
+    fetchUser();
 
     // ✅ OPTIONAL: realtime for NEW chats
     const channel = supabase
@@ -54,19 +46,8 @@ export default function ChatHomePage() {
 
   return (
     <div style={{ padding: 20 }}>
-      <h1>All Conversations</h1>
-
-      {chats.length === 0 && <p>No chats yet</p>}
-
-      {chats.map((c) => (
-        <div
-          key={c.chat_id}
-          style={{ marginTop: 10, cursor: "pointer" }}
-          onClick={() => router.push(`/chat/${c.chat_id}`)}
-        >
-          Chat {c.chat_id.slice(0, 6)}
-        </div>
-      ))}
+      <h1>Click on the left to open to chat.
+        or Click here to Start a New Chat </h1>
     </div>
   );
 }

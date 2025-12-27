@@ -1,35 +1,97 @@
 'use client';
-import { useState } from 'react';
+
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { loginSchema } from '@/hooks/validators/authValidators';
 import { supabase } from '@/config/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+type LoginForm = {
+    email: string;
+    password: string;
+};
 
 export default function LoginPage() {
     const router = useRouter();
-    const [email, setEmail] = useState<string>('');
-    const [password, setPassword] = useState<string>('');
-    const [error, setError] = useState<string | null>(null);
 
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+        setError,
+    } = useForm<LoginForm>({
+        resolver: yupResolver(loginSchema),
+    });
 
-    const login = async () => {
-        const { error, data } = await supabase.auth.signInWithPassword({ email, password });
-        console.log("Login response:", { error, data });
-        if (error) return setError(error.message);
+    const onSubmit = async (data: LoginForm) => {
+        const { error } = await supabase.auth.signInWithPassword({
+            email: data.email,
+            password: data.password,
+        });
+
+        if (error) {
+            setError('root', { message: error.message });
+            return;
+        }
+
         router.push('/');
     };
 
     return (
-        <div style={{ padding: 40 }} className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
-            <div className="max-w-md w-full space-y-8">
-                <h2 className="text-center text-3xl font-bold text-gray-900 dark:text-white">Login</h2>
-                <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
-                <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} className="w-full p-2 border border-gray-300 rounded-md dark:bg-gray-800 dark:border-gray-700 dark:text-white" />
-                <button onClick={login} className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700">Login</button>
-                {error && <p className="text-red-500 text-center">{error}</p>}
-                <p className='text-center'>Already have an account <Link className='hover:underline' href='/register'> Sign In </Link></p>
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 px-4">
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="max-w-md w-full space-y-4"
+            >
+                <h2 className="text-center text-3xl font-bold text-gray-900 dark:text-white">
+                    Login
+                </h2>
 
-            </div>
+                <div>
+                    <input
+                        {...register('email')}
+                        placeholder="Email"
+                        className="w-full p-2 border rounded-md dark:bg-gray-800"
+                    />
+                    {errors.email && (
+                        <p className="text-red-500 text-sm">{errors.email.message}</p>
+                    )}
+                </div>
+
+                <div>
+                    <input
+                        type="password"
+                        {...register('password')}
+                        placeholder="Password"
+                        className="w-full p-2 border rounded-md dark:bg-gray-800"
+                    />
+                    {errors.password && (
+                        <p className="text-red-500 text-sm">{errors.password.message}</p>
+                    )}
+                </div>
+
+                {errors.root && (
+                    <p className="text-red-500 text-center">
+                        {errors.root.message}
+                    </p>
+                )}
+
+                <button
+                    disabled={isSubmitting}
+                    type="submit"
+                    className="w-full py-2 bg-blue-600 text-white rounded-md"
+                >
+                    {isSubmitting ? 'Logging in...' : 'Login'}
+                </button>
+
+                <p className="text-center">
+                    Don’t have an account?{' '}
+                    <Link href="/register" className="hover:underline">
+                        Register
+                    </Link>
+                </p>
+            </form>
         </div>
     );
 }
