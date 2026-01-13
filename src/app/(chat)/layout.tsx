@@ -7,9 +7,14 @@ import { useAuth } from '@/hooks/UseAuth';
 
 export default function ChatLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
-  console.log(user , "user")
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div style={{ height: "100vh", display: "grid", placeItems: "center" }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <>

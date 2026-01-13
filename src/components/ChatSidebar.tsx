@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { supabase } from "@/config/supabase";
-import { startChat } from "@/hooks/Chats";
 import { useRouter } from "next/navigation";
 import UsersList from '@/components/UserLists';
 import Link from "next/link";
